@@ -1,0 +1,113 @@
+USE master;
+GO
+
+/****** Object: Database QuanLyNhanVien ******/
+IF DB_ID('QuanLyNhanVien') IS NOT NULL
+	DROP DATABASE QuanLyNhanVien;
+GO
+
+CREATE DATABASE QuanLyNhanVien;
+GO
+
+USE QuanLyNhanVien;
+GO
+
+/****** Object: Tables ******/
+CREATE TABLE PhongBan
+(
+    MaPhongBan INT IDENTITY(1,1) NOT NULL,
+    TenPhongBan NVARCHAR(50) NOT NULL,
+    SoLuongNhanVien SMALLINT NULL,
+    NgayNhanChuc SMALLDATETIME NOT NULL,
+    MaNhanVien INT NOT NULL,
+
+    CONSTRAINT PK_PhongBan PRIMARY KEY (MaPhongBan)
+);
+GO
+
+CREATE TABLE DuAn
+(
+    MaDuAn INT IDENTITY(1,1) NOT NULL,
+    TenDuAn NVARCHAR(100) NOT NULL,
+    NgayKetThuc SMALLDATETIME NOT NULL DEFAULT('25/04/2025'),
+    TrangThaiDuAn BIT NOT NULL DEFAULT(0),
+    MoTa NTEXT NOT NULL,
+
+    CONSTRAINT PK_DuAn PRIMARY KEY (MaDuAn)
+);
+GO
+
+CREATE TABLE NhanVien
+(
+    MaNhanVien INT IDENTITY(1,1) NOT NULL,
+    HoTen NVARCHAR(255) NOT NULL,
+    NgaySinh SMALLDATETIME NOT NULL,
+    SoDienThoai VARCHAR(11) NOT NULL,
+    QueQuan NVARCHAR(20) NOT NULL,
+    Luong MONEY NOT NULL DEFAULT(0),
+    MaPhongBan INT NOT NULL,
+
+    CONSTRAINT PK_NhanVien PRIMARY KEY (MaNhanVien)
+);
+GO
+
+CREATE TABLE DiaChi
+(
+    SoNha NVARCHAR(10),
+    Duong NVARCHAR(100),
+    ThanhPho NVARCHAR(20),
+    QuocGia NVARCHAR(10),
+    MaNhanVien INT NOT NULL
+);
+GO
+
+CREATE TABLE BangCap
+(
+    MaNhanVien INT NOT NULL,
+    MaBangCap INT IDENTITY(1,1) NOT NULL,
+
+    CONSTRAINT PK_BangCap PRIMARY KEY (MaNhanVien, MaBangCap)
+);
+GO
+
+CREATE TABLE PhanCong
+(
+    MaNhanVien INT NOT NULL,
+    MaDuAn INT NOT NULL,
+    ThoiGian SMALLDATETIME NOT NULL,
+
+    CONSTRAINT PK_PhanCong PRIMARY KEY (MaNhanVien, MaDuAn)
+);
+GO
+
+/****** ALTER TABLE ******/
+ALTER TABLE NhanVien
+ADD CONSTRAINT FK_PhongBanNhanVien
+FOREIGN KEY (MaPhongBan) REFERENCES PhongBan(MaPhongBan);
+GO
+
+ALTER TABLE DiaChi
+ADD CONSTRAINT FK_NhanVienDiaChi
+FOREIGN KEY (MaNhanVien) REFERENCES NhanVien(MaNhanVien);
+GO
+
+ALTER TABLE PhongBan
+ADD CONSTRAINT FK_TruongPhong
+FOREIGN KEY (MaNhanVien) REFERENCES NhanVien(MaNhanVien);
+GO
+
+ALTER TABLE PhanCong
+ADD CONSTRAINT FK_DuAnPhanCong
+FOREIGN KEY (MaDuAn) REFERENCES DuAn(MaDuAn);
+GO
+
+ALTER TABLE PhanCong
+ADD CONSTRAINT FK_NhanVienPhanCong
+FOREIGN KEY (MaNhanVien) REFERENCES NhanVien(MaNhanVien);
+GO
+
+ALTER TABLE BangCap
+ADD CONSTRAINT FK_NhanVienBangCap
+FOREIGN KEY (MaNhanVien) REFERENCES NhanVien(MaNhanVien)
+ON DELETE CASCADE;
+GO
