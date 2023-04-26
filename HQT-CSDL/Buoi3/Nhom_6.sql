@@ -13,8 +13,7 @@ USE QuanLyNhanVien;
 GO
 
 /****** Object: Tables ******/
-CREATE TABLE PhongBan
-(
+CREATE TABLE PhongBan (
     MaPhongBan INT IDENTITY(1,1) NOT NULL,
     TenPhongBan NVARCHAR(50) NOT NULL,
     SoLuongNhanVien SMALLINT NULL,
@@ -25,8 +24,7 @@ CREATE TABLE PhongBan
 );
 GO
 
-CREATE TABLE DuAn
-(
+CREATE TABLE DuAn (
     MaDuAn INT IDENTITY(1,1) NOT NULL,
     TenDuAn NVARCHAR(100) NOT NULL,
     NgayKetThuc SMALLDATETIME NOT NULL DEFAULT('25/04/2025'),
@@ -37,8 +35,7 @@ CREATE TABLE DuAn
 );
 GO
 
-CREATE TABLE NhanVien
-(
+CREATE TABLE NhanVien (
     MaNhanVien INT IDENTITY(1,1) NOT NULL,
     HoTen NVARCHAR(255) NOT NULL,
     NgaySinh SMALLDATETIME NOT NULL,
@@ -51,18 +48,16 @@ CREATE TABLE NhanVien
 );
 GO
 
-CREATE TABLE DiaChi
-(
-    SoNha NVARCHAR(10),
-    Duong NVARCHAR(100),
-    ThanhPho NVARCHAR(20),
-    QuocGia NVARCHAR(10),
+CREATE TABLE DiaChi (
+    SoNha NVARCHAR(10) NULL,
+    Duong NVARCHAR(100) NULL,
+    ThanhPho NVARCHAR(20) NULL,
+    QuocGia NVARCHAR(10) NOT NULL,
     MaNhanVien INT NOT NULL
 );
 GO
 
-CREATE TABLE BangCap
-(
+CREATE TABLE BangCap (
     MaNhanVien INT NOT NULL,
     MaBangCap INT IDENTITY(1,1) NOT NULL,
 
@@ -70,8 +65,7 @@ CREATE TABLE BangCap
 );
 GO
 
-CREATE TABLE PhanCong
-(
+CREATE TABLE PhanCong (
     MaNhanVien INT NOT NULL,
     MaDuAn INT NOT NULL,
     ThoiGian SMALLDATETIME NOT NULL,
