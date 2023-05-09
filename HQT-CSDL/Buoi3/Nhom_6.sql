@@ -98,6 +98,7 @@ CREATE TABLE PhanCong
 );
 GO
 
+
 /****** ALTER TABLE ******/
 ALTER TABLE PhongBan
 ADD CONSTRAINT FK_TruongPhong
