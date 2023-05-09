@@ -194,14 +194,14 @@ CREATE OR ALTER PROC PR_TimKiemNhanVien
     @MaNhanVien INT = -1,
     @HoTen NVARCHAR(40) = NULL,
     @MaPhongBan INT = -1
-    AS 
-    BEGIN
-        SELECT * FROM NhanVien 
-            WHERE 
-            (MaNhanVien = @MaNhanVien OR MaNhanVien = -1)
-            AND (HoTen LIKE '%' + @HoTen + '%' OR @HoTen IS NULL)
-            AND (MaPhongBan = @MaPhongBan OR @MaPhongBan = -1);
-    END
+AS 
+BEGIN
+    SELECT * FROM NhanVien
+        WHERE 
+        (MaNhanVien = @MaNhanVien OR MaNhanVien = -1)
+        AND (HoTen LIKE '%' + @HoTen + '%' OR @HoTen IS NULL)
+        AND (MaPhongBan = @MaPhongBan OR @MaPhongBan = -1);
+END
 GO
 
 -- EXECUTE PR_TimKiemNhanVien @MaNhanVien = 1;
@@ -216,45 +216,45 @@ CREATE OR ALTER PROC PR_ThemNhanVien
     @Luong MONEY = 0,
     @MaPhuong INT = -1,
     @MaPhongBan INT = -1
-    AS 
-    IF NOT EXISTS(SELECT * FROM PhongBan WHERE MaPhongBan = @MaPhongBan)
-        BEGIN
-            PRINT 'Phong ban khong hop le!'
-            RETURN 1
-        END
-    IF NOT EXISTS(SELECT * FROM Phuong WHERE MaPhuong = @MaPhuong)
-        BEGIN
-            PRINT 'Dia chi khong hop le!'
-            RETURN 2
-        END
-    IF @NgaySinh > GETDATE() OR @NgaySinh IS NULL
-        BEGIN
-            PRINT 'Ngay sinh khong hop le!'
-            RETURN 3
-        END
-    IF @HoTen IS NULL
-        BEGIN
-            PRINT 'Ho ten khong duoc de trong!'
-            RETURN 4
-        END
-    IF @SoDienThoai IS NULL
-        BEGIN
-            PRINT 'So dien thoai khong duoc de trong!'
-            RETURN 5
-        END
-    IF @Luong <= 0
-        BEGIN
-            PRINT 'Luong khong hop le!'
-            RETURN 6
-        END
-    INSERT NhanVien (HoTen, NgaySinh, SoDienThoai, Luong, MaPhongBan, MaPhuong) 
-            VALUES(@HoTen, @NgaySinh, @SoDienThoai, @Luong, @MaPhongBan, @MaPhuong)
-    IF @@ERROR <> 0
-        BEGIN
-            PRINT 'Loi them nhan vien!'
-            RETURN 7
-        END
-    RETURN 0
+AS 
+IF NOT EXISTS(SELECT * FROM PhongBan WHERE MaPhongBan = @MaPhongBan)
+    BEGIN
+        PRINT 'Phong ban khong hop le!'
+        RETURN 1
+    END
+IF NOT EXISTS(SELECT * FROM Phuong WHERE MaPhuong = @MaPhuong)
+    BEGIN
+        PRINT 'Dia chi khong hop le!'
+        RETURN 2
+    END
+IF @NgaySinh > GETDATE() OR @NgaySinh IS NULL
+    BEGIN
+        PRINT 'Ngay sinh khong hop le!'
+        RETURN 3
+    END
+IF @HoTen IS NULL
+    BEGIN
+        PRINT 'Ho ten khong duoc de trong!'
+        RETURN 4
+    END
+IF @SoDienThoai IS NULL
+    BEGIN
+        PRINT 'So dien thoai khong duoc de trong!'
+        RETURN 5
+    END
+IF @Luong <= 0
+    BEGIN
+        PRINT 'Luong khong hop le!'
+        RETURN 6
+    END
+INSERT NhanVien (HoTen, NgaySinh, SoDienThoai, Luong, MaPhongBan, MaPhuong) 
+        VALUES(@HoTen, @NgaySinh, @SoDienThoai, @Luong, @MaPhongBan, @MaPhuong)
+IF @@ERROR <> 0
+    BEGIN
+        PRINT 'Loi them nhan vien!'
+        RETURN 7
+    END
+RETURN 0
 GO
 
 
