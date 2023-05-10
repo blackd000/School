@@ -473,7 +473,8 @@ BEGIN
     SELECT MaNhanVien, NgaySinh, QueQuan, Luong, MaPhongBan, MaPhuong, MaHoTen FROM DELETED;
 END;
 GO
-CREATE TABLE OLD_PhongBan (
+CREATE TABLE OLD_PhongBan
+(
     MaPhongBan INT NOT NULL IDENTITY(1,1),
     TenPhongBan NVARCHAR(50) NOT NULL,
     SoLuongNhanVien SMALLINT NOT NULL DEFAULT 0,
@@ -490,7 +491,8 @@ BEGIN
     SELECT MaPhongBan, TenPhongBan, SoLuongNhanVien, NgayNhanChuc, MaNhanVien FROM DELETED;
 END;
 GO
-CREATE TABLE OLD_DuAn (
+CREATE TABLE OLD_DuAn
+(
     MaDuAn INT NOT NULL IDENTITY(1,1),
     TenDuAn NVARCHAR(100) NOT NULL,
     NgayBatDau SMALLDATETIME NOT NULL DEFAULT GETDATE(),
