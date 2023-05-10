@@ -49,6 +49,7 @@ CREATE TABLE NhanVien
     Luong MONEY NOT NULL DEFAULT 0 CHECK (Luong >= 0),
     MaPhongBan INT NOT NULL,
     MaPhuong INT NOT NULL,
+    MaHoTen INT NOT NULL,
 
     CONSTRAINT PK_NhanVien PRIMARY KEY (MaNhanVien)
 );
@@ -80,6 +81,17 @@ CREATE TABLE Phuong
     MaQuan INT NOT NULL,
 
     CONSTRAINT PK_Phuong PRIMARY KEY (MaPhuong)
+);
+GO
+
+CREATE TABLE HoTen
+(
+    MaHoTen INT NOT NULL IDENTITY(1,1),
+    Ho NVARCHAR(20) NOT NULL,
+    TenDem NVARCHAR(20) NOT NULL,
+    Ten NVARCHAR(20) NOT NULL,
+
+    CONSTRAINT PK_HoTen PRIMARY KEY (MaHoTen)
 );
 GO
 
@@ -117,6 +129,11 @@ GO
 ALTER TABLE NhanVien
 ADD CONSTRAINT FK_PhuongNhanVien
 FOREIGN KEY (MaPhuong) REFERENCES Phuong(MaPhuong);
+GO
+
+ALTER TABLE NhanVien
+ADD CONSTRAINT FK_HoTenNhanVien
+FOREIGN KEY (MaHoTen) REFERENCES HoTen(MaHoTen);
 GO
 
 ALTER TABLE Phuong
@@ -160,6 +177,9 @@ CREATE INDEX IX_Phuong_MaQuan ON Phuong (MaQuan);
 GO
 
 CREATE INDEX IX_Quan_MaTinh ON Quan (MaTinh);
+GO
+
+CREATE INDEX IX_NhanVien_MaHoTen ON NhanVien (MaHoTen);
 GO
 
 CREATE INDEX IX_BangCap_MaNhanVien ON BangCap (MaNhanVien);
