@@ -340,7 +340,7 @@ BEGIN
         ON n.MaPhuong = p.MaPhuong
 
     INSERT INTO Quan (TenQuan, MaTinh)
-    SELECT DISTINCT @TenQuan, MaTinh
+    SELECT @TenQuan, MaTinh
     FROM Phuong AS p JOIN Quan AS q
         ON p.MaQuan = q.MaQuan;
 
