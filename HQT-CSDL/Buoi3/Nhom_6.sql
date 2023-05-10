@@ -337,7 +337,7 @@ BEGIN
     INSERT INTO Phuong (TenPhuong, MaQuan)
     SELECT @TenPhuong, MaQuan
     FROM NhanVien AS n JOIN Phuong  AS p
-        ON n.MaPhuong = p.MaPhuong
+        ON n.MaPhuong = p.MaPhuong;
 
     INSERT INTO Quan (TenQuan, MaTinh)
     SELECT @TenQuan, MaTinh
