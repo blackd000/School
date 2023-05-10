@@ -54,7 +54,8 @@ CREATE TABLE NhanVien
 );
 GO
 
-CREATE TABLE Tinh (
+CREATE TABLE Tinh
+(
     MaTinh INT NOT NULL IDENTITY(1,1),
     TenTinh NVARCHAR(20),
 
@@ -62,7 +63,8 @@ CREATE TABLE Tinh (
 );
 GO
 
-CREATE TABLE Quan (
+CREATE TABLE Quan
+(
     MaQuan INT NOT NULL IDENTITY(1,1),
     TenQuan NVARCHAR(20),
     MaTinh INT NOT NULL,
@@ -71,7 +73,8 @@ CREATE TABLE Quan (
 );
 GO
 
-CREATE TABLE Phuong (
+CREATE TABLE Phuong
+(
     MaPhuong INT NOT NULL IDENTITY(1,1),
     TenPhuong NVARCHAR(30),
     MaQuan INT NOT NULL,
