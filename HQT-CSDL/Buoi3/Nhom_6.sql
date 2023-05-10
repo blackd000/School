@@ -449,7 +449,7 @@ AS
 BEGIN
     RAISERROR('Deletion of data from the PhanCong table is not allowed!!!.', 16, 1);
 END;
-Go
+GO
 CREATE TABLE DeleteOrOldUpdateNhanVienTable
 (
     MaNhanVien INT NOT NULL IDENTITY(1,1),
@@ -483,7 +483,7 @@ CREATE TABLE OLD_PhongBan
 );
 GO
 
-CREATE TRIGGER HoldPhongBan ON PhongBan 
+CREATE TRIGGER TR_HoldPhongBan ON PhongBan 
 FOR DELETE, UPDATE
 AS
 BEGIN
@@ -501,7 +501,8 @@ CREATE TABLE OLD_DuAn
     MoTa NTEXT NOT NULL,
 );
 GO
-CREATE TRIGGER HoldDuAn ON DuAn
+
+CREATE TRIGGER TR_HoldDuAn ON DuAn
 INSTEAD OF DELETE, UPDATE
 AS
 BEGIN
