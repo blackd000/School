@@ -43,7 +43,6 @@ GO
 CREATE TABLE NhanVien
 (
     MaNhanVien INT NOT NULL IDENTITY(1,1),
-    HoTen NVARCHAR(80) NOT NULL,
     NgaySinh SMALLDATETIME NOT NULL,
     SoDienThoai VARCHAR(11) NOT NULL,
     QueQuan NVARCHAR(20) NOT NULL,
@@ -196,7 +195,7 @@ GO
 /****** VIEW ******/
 CREATE OR ALTER VIEW VW_ThongTinNhanVien 
 AS
-SELECT NhanVien.MaNhanVien, NhanVien.HoTen, NhanVien.NgaySinh, NhanVien.Luong, NhanVien.SoDienThoai, 
+SELECT NhanVien.MaNhanVien, NhanVien.NgaySinh, NhanVien.Luong, NhanVien.SoDienThoai, 
     Phuong.TenPhuong, Quan.TenQuan, Tinh.TenTinh,
     PhongBan.TenPhongBan FROM NhanVien 
         JOIN Phuong ON Phuong.MaPhuong = NhanVien.MaPhuong
@@ -208,7 +207,7 @@ GO
 CREATE OR ALTER VIEW VW_ThongTinDuAn
 AS
 SELECT DuAn.MaDuAn, DuAn.TenDuAn, DuAn.MoTa, DuAn.NgayKetThuc,
-    NhanVien.MaNhanVien, NhanVien.HoTen, PhanCong.ThoiGian FROM DuAn
+    NhanVien.MaNhanVien, PhanCong.ThoiGian FROM DuAn
         JOIN PhanCong ON PhanCong.MaDuAn = DuAn.MaDuAn
         JOIN NhanVien ON PhanCong.MaNhanVien = NhanVien.MaNhanVien;
 GO
@@ -364,7 +363,6 @@ GO
 
 CREATE PROCEDURE PR_CapNhatNhanVien
     @MaNhanVien INT,
-    @HoTen NVARCHAR(255),
     @NgaySinh SMALLDATETIME,
     @SoDienThoai VARCHAR(11),
     @QueQuan NVARCHAR(20),
@@ -412,19 +410,16 @@ GO
 
 CREATE OR ALTER PROC PR_TimKiemNhanVien
     @MaNhanVien INT = -1,
-    @HoTen NVARCHAR(40) = NULL,
     @MaPhongBan INT = -1
 AS 
 BEGIN
     SELECT * FROM NhanVien
     WHERE (MaNhanVien = @MaNhanVien OR MaNhanVien = -1)
-        AND (HoTen LIKE '%' + @HoTen + '%' OR @HoTen IS NULL)
         AND (MaPhongBan = @MaPhongBan OR @MaPhongBan = -1);
 END;
 GO
 
 -- EXECUTE PR_TimKiemNhanVien @MaNhanVien = 1;
--- EXECUTE PR_TimKiemNhanVien @HoTen = 'Nguyen Van A';
 -- EXECUTE PR_TimKiemNhanVien;
 
 
@@ -453,7 +448,6 @@ GO
 CREATE TABLE DeleteOrOldUpdateNhanVienTable
 (
     MaNhanVien INT NOT NULL IDENTITY(1,1),
-    HoTen NVARCHAR(80) NOT NULL,
     NgaySinh SMALLDATETIME NOT NULL,
     SoDienThoai VARCHAR(11) NOT NULL,
     QueQuan NVARCHAR(20) NOT NULL,
