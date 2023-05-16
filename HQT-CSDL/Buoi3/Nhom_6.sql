@@ -88,7 +88,7 @@ GO
 
 CREATE TABLE BangCap
 (
-    MaBangCap INT NOT NULL IDENTITY(1,1),
+    MaBangCap INT NOT NULL IDENTITY,
     MaNhanVien INT NOT NULL,
 
     CONSTRAINT PK_BangCap PRIMARY KEY (MaNhanVien, MaBangCap)
