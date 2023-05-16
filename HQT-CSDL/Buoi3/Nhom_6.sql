@@ -17,11 +17,11 @@ GO
 /****** Object: Tables ******/
 CREATE TABLE PhongBan
 (
-    MaPhongBan INT NOT NULL IDENTITY,
+    MaPhongBan INT NOT NULL,
     TenPhongBan NVARCHAR(50) NOT NULL,
     SoLuongNhanVien SMALLINT NOT NULL DEFAULT 0,
     NgayNhanChuc SMALLDATETIME NOT NULL DEFAULT GETDATE(),
-    MaNhanVien INT NOT NULL,
+    MaNhanVien INT,
 
     CONSTRAINT PK_PhongBan PRIMARY KEY (MaPhongBan)
 );
@@ -29,7 +29,7 @@ GO
 
 CREATE TABLE DuAn
 (
-    MaDuAn INT NOT NULL IDENTITY,
+    MaDuAn INT NOT NULL,
     TenDuAn NVARCHAR(100) NOT NULL,
     NgayBatDau SMALLDATETIME NOT NULL DEFAULT GETDATE(),
     NgayKetThuc SMALLDATETIME NOT NULL DEFAULT '25/04/2025',
@@ -42,13 +42,10 @@ GO
 
 CREATE TABLE NhanVien
 (
-    MaNhanVien INT NOT NULL IDENTITY,
-    Ho NVARCHAR(20) NOT NULL,
-    TenDem NVARCHAR(20) NOT NULL,
-    Ten NVARCHAR(20) NOT NULL,
+    MaNhanVien INT NOT NULL,
+    HoTen NVARCHAR(20) NOT NULL,
     NgaySinh SMALLDATETIME NOT NULL,
     SoDienThoai VARCHAR(11) NOT NULL,
-    QueQuan NVARCHAR(20) NOT NULL,
     Luong MONEY NOT NULL DEFAULT 0 CHECK (Luong >= 0),
     MaPhongBan INT NOT NULL,
     MaPhuong INT NOT NULL,
@@ -60,7 +57,7 @@ GO
 CREATE TABLE Tinh
 (
     MaTinh INT NOT NULL,
-    TenTinh NVARCHAR(20),
+    TenTinh NVARCHAR(30),
 
     CONSTRAINT PK_Tinh PRIMARY KEY (MaTinh)
 );
@@ -69,7 +66,7 @@ GO
 CREATE TABLE Quan
 (
     MaQuan INT NOT NULL,
-    TenQuan NVARCHAR(20),
+    TenQuan NVARCHAR(30),
     MaTinh INT NOT NULL,
 
     CONSTRAINT PK_Quan PRIMARY KEY (MaQUan)
@@ -88,7 +85,7 @@ GO
 
 CREATE TABLE BangCap
 (
-    MaBangCap INT NOT NULL IDENTITY,
+    MaBangCap INT NOT NULL,
     MaNhanVien INT NOT NULL,
 
     CONSTRAINT PK_BangCap PRIMARY KEY (MaNhanVien, MaBangCap)
@@ -178,7 +175,7 @@ GO
 /****** VIEW ******/
 CREATE OR ALTER VIEW VW_ThongTinNhanVien 
 AS
-SELECT NhanVien.MaNhanVien, NhanVien.NgaySinh, NhanVien.Luong, NhanVien.SoDienThoai, 
+SELECT NhanVien.MaNhanVien, NhanVien.HoTen, NhanVien.NgaySinh, NhanVien.Luong, NhanVien.SoDienThoai, 
     Phuong.TenPhuong, Quan.TenQuan, Tinh.TenTinh,
     PhongBan.TenPhongBan FROM NhanVien 
         JOIN Phuong ON Phuong.MaPhuong = NhanVien.MaPhuong
@@ -271,112 +268,51 @@ RETURN 0;
 GO
 
 CREATE OR ALTER PROC PR_ThemNhanVien
-    @NgaySinh SMALLDATETIME,
-    @Ho NVARCHAR(20),
-    @TenDem NVARCHAR(20),
-    @Ten NVARCHAR(20),
-    @SoDienThoai VARCHAR(11),
-    @QueQuan NVARCHAR(20),
+    @HoTen NVARCHAR(40) = NULL,
+    @NgaySinh SMALLDATETIME = NULL,
+    @SoDienThoai VARCHAR(11) = NULL,
     @Luong MONEY = 0,
-    @TenTinh NVARCHAR(20),
-    @TenQuan NVARCHAR(20),
-    @TenPhuong NVARCHAR(30),
-    @MaPhongBan INT = -1,
-    @MaPhuong INT = -1
-AS
-IF NOT EXISTS(SELECT * FROM PhongBan WHERE MaPhongBan = @MaPhongBan)
-    BEGIN
-        PRINT 'Phong ban khong hop le!'
-        RETURN 1
-    END
-IF NOT EXISTS(SELECT * FROM Phuong WHERE MaPhuong = @MaPhuong)
-    BEGIN
-        PRINT 'Dia chi khong hop le!'
-        RETURN 2
-    END
-IF @NgaySinh > GETDATE() OR @NgaySinh IS NULL
-    BEGIN
-        PRINT 'Ngay sinh khong hop le!'
-        RETURN 4
-    END
-IF @SoDienThoai IS NULL
-    BEGIN
-        PRINT 'So dien thoai khong duoc de trong!'
-        RETURN 5
-    END
-BEGIN
-    INSERT INTO NhanVien
-        (NgaySinh, Ho, TenDem, Ten, SoDienThoai, QueQuan, Luong, MaPhongBan, MaPhuong)
-    VALUES
-        (@NgaySinh, @Ho, @TenDem, @Ten, @SoDienThoai, @QueQuan, @Luong, @MaPhongBan, @MaPhuong);
-    
-    INSERT INTO Phuong (TenPhuong, MaQuan)
-    SELECT @TenPhuong, MaQuan
-    FROM NhanVien AS n JOIN Phuong  AS p
-        ON n.MaPhuong = p.MaPhuong;
-
-    INSERT INTO Quan (TenQuan, MaTinh)
-    SELECT @TenQuan, MaTinh
-    FROM Phuong AS p JOIN Quan AS q
-        ON p.MaQuan = q.MaQuan;
-
-    INSERT INTO Tinh (TenTinh)
-    SELECT @TenQuan
-    FROM Quan AS q JOIN Tinh AS t
-        ON q.MaTinh = t.MaTinh;
-END
-IF @@ERROR <> 0
-    BEGIN
-        PRINT 'Loi them nhan vien!'
-        RETURN 6
-    END
-RETURN 0;
-GO
-
-CREATE PROCEDURE PR_CapNhatNhanVien
-    @MaNhanVien INT,
-    @Ho NVARCHAR(20),
-    @TenDem NVARCHAR(20),
-    @Ten NVARCHAR(20),
-    @NgaySinh SMALLDATETIME,
-    @SoDienThoai VARCHAR(11),
-    @QueQuan NVARCHAR(20),
-    @Luong MONEY = 0,
-    @TenPhuong NVARCHAR(30),
-    @TenQuan NVARCHAR(20),
-    @TenTinh NVARCHAR(20),
-    @MaPhongBan INT = -1,
-    @MaPhuong INT = -1
-AS
-IF NOT EXISTS(SELECT * FROM PhongBan WHERE MaPhongBan = @MaPhongBan)
-    BEGIN
-        PRINT 'Phong ban khong hop le!'
-        RETURN 1
-    END
-IF NOT EXISTS(SELECT * FROM Phuong WHERE MaPhuong = @MaPhuong)
-    BEGIN
-        PRINT 'Dia chi khong hop le!'
-        RETURN 2
-    END
-BEGIN
-    UPDATE NhanVien
-    SET NgaySinh = @NgaySinh,
-        Ho = @Ho,
-        TenDem = @TenDem,
-        Ten = @Ten,
-        SoDienThoai = @SoDienThoai,
-        QueQuan = @QueQuan,
-        Luong = @Luong,
-        MaPhongBan = @MaPhongBan,
-        MaPhuong = @MaPhuong
-    WHERE MaNhanVien = @MaNhanVien;
-END
-IF @@ERROR <> 0
-    BEGIN
-        PRINT 'Loi cap nhat nhan vien!'
-        RETURN 6
-    END
-RETURN 0;
+    @MaPhuong INT = -1,
+    @MaPhongBan INT = -1
+    AS 
+    IF NOT EXISTS(SELECT * FROM PhongBan WHERE MaPhongBan = @MaPhongBan)
+        BEGIN
+            PRINT 'Phong ban khong hop le!'
+            RETURN 1
+        END
+    IF NOT EXISTS(SELECT * FROM Phuong WHERE MaPhuong = @MaPhuong)
+        BEGIN
+            PRINT 'Dia chi khong hop le!'
+            RETURN 2
+        END
+    IF @NgaySinh > GETDATE() OR @NgaySinh IS NULL
+        BEGIN
+            PRINT 'Ngay sinh khong hop le!'
+            RETURN 3
+        END
+    IF @HoTen IS NULL
+        BEGIN
+            PRINT 'Ho ten khong duoc de trong!'
+            RETURN 4
+        END
+    IF @SoDienThoai IS NULL
+        BEGIN
+            PRINT 'So dien thoai khong duoc de trong!'
+            RETURN 5
+        END
+    IF @Luong <= 0
+        BEGIN
+            PRINT 'Luong khong hop le!'
+            RETURN 6
+        END
+    INSERT NhanVien (HoTen, NgaySinh, SoDienThoai, Luong, MaPhongBan, MaPhuong) 
+            VALUES(@HoTen, @NgaySinh, @SoDienThoai, @Luong, @MaPhongBan, @MaPhuong)
+    IF @@ERROR <> 0
+        BEGIN
+            PRINT 'Loi them nhan vien!'
+            RETURN 7
+        END
+    RETURN 0
 GO
 
 CREATE OR ALTER PROC PR_TimKiemNhanVien
@@ -419,9 +355,7 @@ GO
 CREATE TABLE DeleteOrOldUpdateNhanVienTable
 (
     MaNhanVien INT NOT NULL IDENTITY,
-    Ho NVARCHAR(20) NOT NULL,
-    TenDem NVARCHAR(20) NOT NULL,
-    Ten NVARCHAR(20) NOT NULL,
+    HoTen NVARCHAR(20) NOT NULL,
     NgaySinh SMALLDATETIME NOT NULL,
     SoDienThoai VARCHAR(11) NOT NULL,
     QueQuan NVARCHAR(20) NOT NULL,
@@ -436,8 +370,8 @@ FOR DELETE, UPDATE
 AS
 BEGIN
     INSERT INTO DeleteOrOldUpdateNhanVienTable
-        (MaNhanVien, Ho, TenDem, Ten, NgaySinh, SoDienThoai, QueQuan, Luong, MaPhongBan, MaPhuong)
-    SELECT MaNhanVien, Ho, TenDem, Ten, NgaySinh, SoDienThoai, QueQuan, Luong, MaPhongBan, MaPhuong
+        (MaNhanVien, HoTen, NgaySinh, SoDienThoai, Luong, MaPhongBan, MaPhuong)
+    SELECT MaNhanVien, HoTen, NgaySinh, SoDienThoai, Luong, MaPhongBan, MaPhuong
     FROM DELETED;
 END;
 GO
