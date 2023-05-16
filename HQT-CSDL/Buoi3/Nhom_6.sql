@@ -17,7 +17,7 @@ GO
 /****** Object: Tables ******/
 CREATE TABLE PhongBan
 (
-    MaPhongBan INT NOT NULL IDENTITY(1,1),
+    MaPhongBan INT NOT NULL IDENTITY,
     TenPhongBan NVARCHAR(50) NOT NULL,
     SoLuongNhanVien SMALLINT NOT NULL DEFAULT 0,
     NgayNhanChuc SMALLDATETIME NOT NULL DEFAULT GETDATE(),
@@ -29,7 +29,7 @@ GO
 
 CREATE TABLE DuAn
 (
-    MaDuAn INT NOT NULL IDENTITY(1,1),
+    MaDuAn INT NOT NULL IDENTITY,
     TenDuAn NVARCHAR(100) NOT NULL,
     NgayBatDau SMALLDATETIME NOT NULL DEFAULT GETDATE(),
     NgayKetThuc SMALLDATETIME NOT NULL DEFAULT '25/04/2025',
@@ -42,14 +42,16 @@ GO
 
 CREATE TABLE NhanVien
 (
-    MaNhanVien INT NOT NULL IDENTITY(1,1),
+    MaNhanVien INT NOT NULL IDENTITY,
+    Ho NVARCHAR(20) NOT NULL,
+    TenDem NVARCHAR(20) NOT NULL,
+    Ten NVARCHAR(20) NOT NULL,
     NgaySinh SMALLDATETIME NOT NULL,
     SoDienThoai VARCHAR(11) NOT NULL,
     QueQuan NVARCHAR(20) NOT NULL,
     Luong MONEY NOT NULL DEFAULT 0 CHECK (Luong >= 0),
     MaPhongBan INT NOT NULL,
     MaPhuong INT NOT NULL,
-    MaHoTen INT NOT NULL,
 
     CONSTRAINT PK_NhanVien PRIMARY KEY (MaNhanVien)
 );
@@ -57,7 +59,7 @@ GO
 
 CREATE TABLE Tinh
 (
-    MaTinh INT NOT NULL IDENTITY(1,1),
+    MaTinh INT NOT NULL,
     TenTinh NVARCHAR(20),
 
     CONSTRAINT PK_Tinh PRIMARY KEY (MaTinh)
@@ -66,7 +68,7 @@ GO
 
 CREATE TABLE Quan
 (
-    MaQuan INT NOT NULL IDENTITY(1,1),
+    MaQuan INT NOT NULL,
     TenQuan NVARCHAR(20),
     MaTinh INT NOT NULL,
 
@@ -76,22 +78,11 @@ GO
 
 CREATE TABLE Phuong
 (
-    MaPhuong INT NOT NULL IDENTITY(1,1),
+    MaPhuong INT NOT NULL,
     TenPhuong NVARCHAR(30),
     MaQuan INT NOT NULL,
 
     CONSTRAINT PK_Phuong PRIMARY KEY (MaPhuong)
-);
-GO
-
-CREATE TABLE HoTen
-(
-    MaHoTen INT NOT NULL IDENTITY(1,1),
-    Ho NVARCHAR(20) NOT NULL,
-    TenDem NVARCHAR(20) NOT NULL,
-    Ten NVARCHAR(20) NOT NULL,
-
-    CONSTRAINT PK_HoTen PRIMARY KEY (MaHoTen)
 );
 GO
 
@@ -129,11 +120,6 @@ GO
 ALTER TABLE NhanVien
 ADD CONSTRAINT FK_PhuongNhanVien
 FOREIGN KEY (MaPhuong) REFERENCES Phuong(MaPhuong);
-GO
-
-ALTER TABLE NhanVien
-ADD CONSTRAINT FK_HoTenNhanVien
-FOREIGN KEY (MaHoTen) REFERENCES HoTen(MaHoTen);
 GO
 
 ALTER TABLE Phuong
@@ -177,9 +163,6 @@ CREATE INDEX IX_Phuong_MaQuan ON Phuong (MaQuan);
 GO
 
 CREATE INDEX IX_Quan_MaTinh ON Quan (MaTinh);
-GO
-
-CREATE INDEX IX_NhanVien_MaHoTen ON NhanVien (MaHoTen);
 GO
 
 CREATE INDEX IX_BangCap_MaNhanVien ON BangCap (MaNhanVien);
@@ -289,18 +272,17 @@ GO
 
 CREATE OR ALTER PROC PR_ThemNhanVien
     @NgaySinh SMALLDATETIME,
+    @Ho NVARCHAR(20),
+    @TenDem NVARCHAR(20),
+    @Ten NVARCHAR(20),
     @SoDienThoai VARCHAR(11),
     @QueQuan NVARCHAR(20),
     @Luong MONEY = 0,
     @TenTinh NVARCHAR(20),
     @TenQuan NVARCHAR(20),
     @TenPhuong NVARCHAR(30),
-    @Ho NVARCHAR(20),
-    @TenDem NVARCHAR(20),
-    @Ten NVARCHAR(20),
     @MaPhongBan INT = -1,
-    @MaPhuong INT = -1,
-    @MaHoTen INT = -1
+    @MaPhuong INT = -1
 AS
 IF NOT EXISTS(SELECT * FROM PhongBan WHERE MaPhongBan = @MaPhongBan)
     BEGIN
@@ -311,11 +293,6 @@ IF NOT EXISTS(SELECT * FROM Phuong WHERE MaPhuong = @MaPhuong)
     BEGIN
         PRINT 'Dia chi khong hop le!'
         RETURN 2
-    END
-IF NOT EXISTS(SELECT * FROM HoTen WHERE MaHoTen = @MaHoTen)
-    BEGIN
-        PRINT 'Ho Ten khong hop le!'
-        RETURN 3
     END
 IF @NgaySinh > GETDATE() OR @NgaySinh IS NULL
     BEGIN
@@ -328,10 +305,10 @@ IF @SoDienThoai IS NULL
         RETURN 5
     END
 BEGIN
-    INSERT INTO NhanVien (NgaySinh, SoDienThoai, QueQuan, Luong, MaPhongBan, MaPhuong,
-        MaHoTen)
-    VALUES (@NgaySinh, @SoDienThoai, @QueQuan, @Luong, @MaPhongBan, @MaPhuong,
-        @MaHoTen);
+    INSERT INTO NhanVien
+        (NgaySinh, Ho, TenDem, Ten, SoDienThoai, QueQuan, Luong, MaPhongBan, MaPhuong)
+    VALUES
+        (@NgaySinh, @Ho, @TenDem, @Ten, @SoDienThoai, @QueQuan, @Luong, @MaPhongBan, @MaPhuong);
     
     INSERT INTO Phuong (TenPhuong, MaQuan)
     SELECT @TenPhuong, MaQuan
@@ -347,11 +324,6 @@ BEGIN
     SELECT @TenQuan
     FROM Quan AS q JOIN Tinh AS t
         ON q.MaTinh = t.MaTinh;
-
-    INSERT INTO HoTen (Ho, TenDem, Ten)
-    SELECT @Ho, @TenDem, @Ten
-    FROM NhanVien AS n JOIN HoTen AS h
-        ON n.MaHoTen = h.MaHoTen;
 END
 IF @@ERROR <> 0
     BEGIN
@@ -363,6 +335,9 @@ GO
 
 CREATE PROCEDURE PR_CapNhatNhanVien
     @MaNhanVien INT,
+    @Ho NVARCHAR(20),
+    @TenDem NVARCHAR(20),
+    @Ten NVARCHAR(20),
     @NgaySinh SMALLDATETIME,
     @SoDienThoai VARCHAR(11),
     @QueQuan NVARCHAR(20),
@@ -371,8 +346,7 @@ CREATE PROCEDURE PR_CapNhatNhanVien
     @TenQuan NVARCHAR(20),
     @TenTinh NVARCHAR(20),
     @MaPhongBan INT = -1,
-    @MaPhuong INT = -1,
-    @MaHoTen INT = -1
+    @MaPhuong INT = -1
 AS
 IF NOT EXISTS(SELECT * FROM PhongBan WHERE MaPhongBan = @MaPhongBan)
     BEGIN
@@ -384,20 +358,17 @@ IF NOT EXISTS(SELECT * FROM Phuong WHERE MaPhuong = @MaPhuong)
         PRINT 'Dia chi khong hop le!'
         RETURN 2
     END
-IF NOT EXISTS(SELECT * FROM HoTen WHERE MaHoTen = @MaHoTen)
-    BEGIN
-        PRINT 'Ho Ten khong hop le!'
-        RETURN 3
-    END
 BEGIN
     UPDATE NhanVien
     SET NgaySinh = @NgaySinh,
+        Ho = @Ho,
+        TenDem = @TenDem,
+        Ten = @Ten,
         SoDienThoai = @SoDienThoai,
         QueQuan = @QueQuan,
         Luong = @Luong,
         MaPhongBan = @MaPhongBan,
-        MaPhuong = @MaPhuong,
-        MaHoTen = @MaHoTen
+        MaPhuong = @MaPhuong
     WHERE MaNhanVien = @MaNhanVien;
 END
 IF @@ERROR <> 0
@@ -447,14 +418,16 @@ END;
 GO
 CREATE TABLE DeleteOrOldUpdateNhanVienTable
 (
-    MaNhanVien INT NOT NULL IDENTITY(1,1),
+    MaNhanVien INT NOT NULL IDENTITY,
+    Ho NVARCHAR(20) NOT NULL,
+    TenDem NVARCHAR(20) NOT NULL,
+    Ten NVARCHAR(20) NOT NULL,
     NgaySinh SMALLDATETIME NOT NULL,
     SoDienThoai VARCHAR(11) NOT NULL,
     QueQuan NVARCHAR(20) NOT NULL,
     Luong MONEY NOT NULL DEFAULT 0 CHECK (Luong >= 0),
     MaPhongBan INT NOT NULL,
     MaPhuong INT NOT NULL,
-    MaHoTen INT NOT NULL,
 );
 GO
 
@@ -462,14 +435,15 @@ CREATE TRIGGER TR_HoldNhanVienData ON NhanVien
 FOR DELETE, UPDATE
 AS
 BEGIN
-    INSERT INTO DeleteOrOldUpdateNhanVienTable (MaNhanVien, NgaySinh, QueQuan, Luong, MaPhongBan,
-        MaPhuong, MaHoTen)
-    SELECT MaNhanVien, NgaySinh, QueQuan, Luong, MaPhongBan, MaPhuong, MaHoTen FROM DELETED;
+    INSERT INTO DeleteOrOldUpdateNhanVienTable
+        (MaNhanVien, Ho, TenDem, Ten, NgaySinh, SoDienThoai, QueQuan, Luong, MaPhongBan, MaPhuong)
+    SELECT MaNhanVien, Ho, TenDem, Ten, NgaySinh, SoDienThoai, QueQuan, Luong, MaPhongBan, MaPhuong
+    FROM DELETED;
 END;
 GO
 CREATE TABLE OLD_PhongBan
 (
-    MaPhongBan INT NOT NULL IDENTITY(1,1),
+    MaPhongBan INT NOT NULL IDENTITY,
     TenPhongBan NVARCHAR(50) NOT NULL,
     SoLuongNhanVien SMALLINT NOT NULL DEFAULT 0,
     NgayNhanChuc SMALLDATETIME NOT NULL DEFAULT GETDATE(),
@@ -481,13 +455,15 @@ CREATE TRIGGER TR_HoldPhongBan ON PhongBan
 FOR DELETE, UPDATE
 AS
 BEGIN
-    INSERT INTO OLD_PhongBan (MaPhongBan,TenPhongBan, SoLuongNhanVien, NgayNhanChuc, MaNhanVien)
-    SELECT MaPhongBan, TenPhongBan, SoLuongNhanVien, NgayNhanChuc, MaNhanVien FROM DELETED;
+    INSERT INTO OLD_PhongBan
+        (MaPhongBan,TenPhongBan, SoLuongNhanVien, NgayNhanChuc, MaNhanVien)
+    SELECT MaPhongBan, TenPhongBan, SoLuongNhanVien, NgayNhanChuc, MaNhanVien
+    FROM DELETED;
 END;
 GO
 CREATE TABLE OLD_DuAn
 (
-    MaDuAn INT NOT NULL IDENTITY(1,1),
+    MaDuAn INT NOT NULL IDENTITY,
     TenDuAn NVARCHAR(100) NOT NULL,
     NgayBatDau SMALLDATETIME NOT NULL DEFAULT GETDATE(),
     NgayKetThuc SMALLDATETIME NOT NULL DEFAULT '25/04/2025',
