@@ -48,7 +48,6 @@ GO
 GRANT SELECT ON DuAn TO TN WITH GRANT OPTION;
 GO
 
--- Dùng Role để gán vai trò SELECT của Quản lý cho Trưởng nhóm
 -- Thu hồi quyền đệ quy
 REVOKE SELECT ON DuAn FROM TN CASCADE;
 GO
