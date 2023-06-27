@@ -16,7 +16,7 @@ namespace AesFileEncryption
             DecryptFile(encryptedFile, decryptedFile, password);
         }
 
-        static void EncryptFile(string inputFile, string outputFile, string password)
+        public static void EncryptFile(string inputFile, string outputFile, string password)
         {
             byte[] salt = GenerateRandomSalt();
             using (Aes aes = Aes.Create())
@@ -41,7 +41,7 @@ namespace AesFileEncryption
             }
         }
 
-        static void DecryptFile(string inputFile, string outputFile, string password)
+        public static void DecryptFile(string inputFile, string outputFile, string password)
         {
             using (FileStream inputStream = new FileStream(inputFile, FileMode.Open))
             {
@@ -65,7 +65,7 @@ namespace AesFileEncryption
             }
         }
 
-        static byte[] GenerateRandomSalt()
+        private static byte[] GenerateRandomSalt()
         {
             byte[] salt = new byte[16];
             using (var rng = RandomNumberGenerator.Create())
