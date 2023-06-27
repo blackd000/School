@@ -1,0 +1,1 @@
+KhachHang[maso=3, hoten=dong, namsinh=2003-04-25]
